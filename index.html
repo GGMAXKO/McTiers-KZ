@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>MCTiers KZ</title>
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"></script>
+
+<style>
+body {
+  margin:0;
+  font-family: Arial;
+  background:#0b0f1a;
+  color:white;
+}
+
+/* NAV */
+.nav {
+  background:#020617;
+  padding:15px;
+  display:flex;
+  justify-content:space-between;
+}
+.logo { color:#38bdf8; font-size:20px; }
+
+/* LEADERBOARD */
+.container { padding:20px; }
+
+.player {
+  background:#111827;
+  padding:15px;
+  margin:10px auto;
+  width:400px;
+  border-radius:10px;
+  display:flex;
+  justify-content:space-between;
+}
+
+.rank {
+  padding:5px 10px;
+  border-radius:8px;
+  font-weight:bold;
+}
+
+.HT1 { background:red; }
+.HT2 { background:orange; }
+.HT3 { background:yellow; color:black; }
+
+.LT1 { background:#22c55e; }
+.LT2 { background:#3b82f6; }
+.LT3 { background:#a855f7; }
+
+/* LOGIN */
+.login {
+  text-align:center;
+  margin-top:40px;
+}
+
+input, button {
+  padding:10px;
+  margin:5px;
+}
+
+.admin { display:none; }
+
+/* DASHBOARD */
+.dashboard {
+  margin-top:20px;
+}
+.card {
+  background:#111827;
+  padding:20px;
+  margin:10px auto;
+  width:350px;
+  border-radius:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="nav">
+  <div class="logo">MCTiers KZ</div>
+</div>
+
+<div class="container">
+  <h2>Leaderboard</h2>
+  <div id="players"></div>
+</div>
+
+<div class="login">
+  <h3>Admin Login</h3>
+  <input id="pass" placeholder="Пароль">
+  <button onclick="login()">Кіру</button>
+</div>
+
+<div class="admin" id="adminPanel">
+
+<div class="dashboard">
+
+<div class="card">
+<h3>Игрок қосу / өзгерту</h3>
+<input id="nick" placeholder="Nick">
+<input id="tier" placeholder="HT1 / LT1">
+<button onclick="save()">Сақтау</button>
+</div>
+
+<div class="card">
+<h3>Удалить</h3>
+<input id="del" placeholder="Nick">
+<button onclick="delPlayer()">Удалить</button>
+</div>
+
+</div>
+
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "API_KEY",
+  authDomain: "PROJECT.firebaseapp.com",
+  databaseURL: "https://PROJECT-default-rtdb.firebaseio.com",
+  projectId: "PROJECT"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// LOGIN
+function login(){
+  let pass = document.getElementById("pass").value;
+  if(pass === "998866"){
+    document.getElementById("adminPanel").style.display = "block";
+    alert("Admin OK");
+  } else alert("Қате!");
+}
+
+// SAVE PLAYER
+function save(){
+  let nick = document.getElementById("nick").value;
+  let tier = document.getElementById("tier").value;
+
+  db.ref("players/"+nick).set({tier:tier});
+  load();
+}
+
+// DELETE
+function delPlayer(){
+  let nick = document.getElementById("del").value;
+  db.ref("players/"+nick).remove();
+  load();
+}
+
+// LOAD PLAYERS
+function load(){
+  let div = document.getElementById("players");
+  div.innerHTML = "";
+
+  db.ref("players").once("value", snap=>{
+    snap.forEach(child=>{
+      let t = child.val().tier;
+
+      let el = document.createElement("div");
+      el.className="player";
+
+      el.innerHTML = `
+        <span>${child.key}</span>
+        <span class="rank ${t}">${t}</span>
+      `;
+
+      div.appendChild(el);
+    });
+  });
+}
+
+load();
+</script>
+
+</body>
+</html>
